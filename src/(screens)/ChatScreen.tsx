@@ -1,32 +1,66 @@
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { Colors } from '../constants/colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { chatHistory } from '../utils';
-import { Chat } from '../components/Chat';
-import { Message } from '../types';
+import { Message } from '../components/Message';
+import { Message as MessageType } from '../types';
 import { TypingAnimation } from '../components/TypingAnimation';
 
 export default function ChatScreen() {
-  const [visibleMessages, setVisibleMessages] = useState<Message[]>([]);
+  const [visibleMessages, setVisibleMessages] = useState<MessageType[]>([]);
   const [isTyping, setIsTyping] = useState(false);
+  const [inputText, setInputText] = useState('');
+
+  const flatListRef = useRef<FlatList>(null);
+
+  const renderItem = ({ item }: { item: MessageType }) => (
+    <Message message={item} />
+  );
+  const renderFooter = () => {
+    if (!isTyping) return null;
+    return (
+      <View style={styles.leftChat}>
+        <TypingAnimation />
+      </View>
+    );
+  };
 
   useEffect(() => {
     const showMessagesSequentially = async () => {
       for (let i = 0; i < chatHistory.length; i++) {
-        if (chatHistory[i].from === 1) {
-          setIsTyping(true);
+        const msg = chatHistory[i];
+
+        if (msg.from === 1) {
+          if (msg.type === 1) {
+            await new Promise<void>(resolve => setTimeout(resolve, 500));
+          } else {
+            setIsTyping(true);
+            const randomDelay =
+              Math.floor(Math.random() * (5000 - 1000 + 1)) + 1000;
+            await new Promise<void>(resolve =>
+              setTimeout(() => resolve(), randomDelay),
+            );
+            setIsTyping(false);
+          }
+        } else {
+          if (msg.type === 1) {
+            await new Promise<void>(resolve => setTimeout(resolve, 500));
+          } else {
+            const textToType = msg.text || '';
+
+            for (let j = 0; j <= textToType.length; j++) {
+              setInputText(textToType.substring(0, j));
+              await new Promise<void>(resolve => setTimeout(resolve, 30));
+            }
+
+            await new Promise<void>(resolve => setTimeout(resolve, 500));
+            setInputText('');
+          }
         }
 
-        const randomDelay =
-          Math.floor(Math.random() * (5000 - 1000 + 1)) + 1000;
-        await new Promise<void>(resolve => {
-          setTimeout(() => resolve(), randomDelay);
-        });
-
-        setVisibleMessages(prev => [...prev, chatHistory[i]]);
-        setIsTyping(false);
+        setVisibleMessages(prev => [...prev, msg]);
       }
     };
 
@@ -35,21 +69,18 @@ export default function ChatScreen() {
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>
-      <ScrollView
-        style={styles.scroll}
+      <FlatList
+        ref={flatListRef}
         contentContainerStyle={styles.scrollContent}
+        data={visibleMessages}
+        keyExtractor={item => String(item.id)}
+        renderItem={renderItem}
         showsVerticalScrollIndicator={false}
-      >
-        {visibleMessages.map((message, index) => (
-          <Chat key={index} message={message} />
-        ))}
-        {isTyping && (
-          <View style={styles.leftChat}>
-            <TypingAnimation />
-          </View>
-        )}
-      </ScrollView>
+        onLayout={() => flatListRef.current?.scrollToEnd({ animated: true })}
+        ListFooterComponent={renderFooter}
+      />
       <View style={styles.textInputContainer}>
+        <Text style={styles.fakeInputText}>{inputText}</Text>
         <View style={styles.sendButton}>
           <Ionicons name="send" color="white" size={20} />
         </View>
@@ -59,16 +90,6 @@ export default function ChatScreen() {
 }
 
 const styles = StyleSheet.create({
-  leftChat: {
-    maxWidth: '60%',
-    alignItems: 'center',
-    backgroundColor: Colors.secondary,
-    padding: 12,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderBottomRightRadius: 16,
-    alignSelf: 'flex-start',
-  },
   container: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -82,13 +103,17 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   textInputContainer: {
-    height: 48,
+    minHeight: 48,
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
     borderWidth: 2,
     borderColor: Colors.border,
     borderRadius: 24,
-    padding: 2,
+    paddingStart: 12,
+    paddingEnd: 4,
+    paddingVertical: 4,
     marginHorizontal: 16,
     marginVertical: 4,
   },
@@ -100,5 +125,19 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 40,
     alignSelf: 'flex-end',
+  },
+  fakeInputText: {
+    flex: 1,
+    color: 'white',
+  },
+  leftChat: {
+    maxWidth: '60%',
+    alignItems: 'center',
+    backgroundColor: Colors.secondary,
+    padding: 12,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    borderBottomRightRadius: 16,
+    alignSelf: 'flex-start',
   },
 });
