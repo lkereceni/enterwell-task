@@ -5,7 +5,7 @@ export const Colors = {
   background: '#1D1E18',
 
   surface: '#2A2B24',
-  overlay: 'rgba(0, 0, 0, 0.5)',
+  overlay: 'rgba(0, 0, 0, 0.45)',
 
   textPrimary: '#FFFFFF',
   textSecondary: '#A0A090',

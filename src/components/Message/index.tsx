@@ -4,9 +4,13 @@ import { Message as MessageType } from '../../types';
 
 interface MessageProps {
   message: MessageType;
+  lookup?: Map<number, MessageType>;
 }
 
-export const Message = ({ message }: MessageProps) => {
+export const Message = ({ message, lookup }: MessageProps) => {
+  const repliedMessage =
+    message.replyTo && lookup ? lookup.get(message.replyTo) : null;
+
   return (
     <View
       style={
@@ -15,12 +19,23 @@ export const Message = ({ message }: MessageProps) => {
           : styles.rightMessageContainer
       }
     >
+      {message.replyTo !== null ? (
+        <View style={styles.messageReplyContainer}>
+          <Text
+            style={styles.messageReplyText}
+            numberOfLines={5}
+            lineBreakMode="tail"
+          >
+            {repliedMessage?.text}
+          </Text>
+        </View>
+      ) : null}
       {message.type === 1 && message.url ? (
         <Image
           style={styles.image}
           width={300}
           height={200}
-          src={message.url}
+          source={{ uri: message.url }}
         />
       ) : (
         <Text style={message.from === 1 ? styles.leftText : styles.rightText}>
@@ -35,28 +50,38 @@ const styles = StyleSheet.create({
   leftMessageContainer: {
     maxWidth: '90%',
     backgroundColor: Colors.secondary,
-    padding: 8,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderBottomRightRadius: 16,
+    padding: 4,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    borderBottomRightRadius: 12,
     alignSelf: 'flex-start',
   },
   leftText: {
     color: Colors.onSecondary,
+    padding: 4,
   },
   rightMessageContainer: {
     maxWidth: '90%',
     backgroundColor: Colors.accent,
-    padding: 8,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    borderBottomLeftRadius: 16,
+    padding: 4,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    borderBottomLeftRadius: 12,
     alignSelf: 'flex-end',
   },
   rightText: {
     color: Colors.onAccent,
+    padding: 4,
   },
   image: {
     borderRadius: 8,
+  },
+  messageReplyContainer: {
+    backgroundColor: Colors.overlay,
+    padding: 8,
+    borderRadius: 8,
+  },
+  messageReplyText: {
+    color: Colors.textSecondary,
   },
 });

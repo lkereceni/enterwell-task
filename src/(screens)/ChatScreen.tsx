@@ -1,7 +1,7 @@
 import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { Colors } from '../constants/colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Ionicons from '@react-native-vector-icons/ionicons';
 import { chatHistory } from '../utils';
 import { Message } from '../components/Message';
@@ -14,18 +14,6 @@ export default function ChatScreen() {
   const [inputText, setInputText] = useState('');
 
   const flatListRef = useRef<FlatList>(null);
-
-  const renderItem = ({ item }: { item: MessageType }) => (
-    <Message message={item} />
-  );
-  const renderFooter = () => {
-    if (!isTyping) return null;
-    return (
-      <View style={styles.leftChat}>
-        <TypingAnimation />
-      </View>
-    );
-  };
 
   useEffect(() => {
     const showMessagesSequentially = async () => {
@@ -66,6 +54,22 @@ export default function ChatScreen() {
 
     showMessagesSequentially();
   }, []);
+
+  const renderItem = ({ item }: { item: MessageType }) => (
+    <Message message={item} lookup={messageLookup} />
+  );
+  const renderFooter = () => {
+    if (!isTyping) return null;
+    return (
+      <View style={styles.leftChat}>
+        <TypingAnimation />
+      </View>
+    );
+  };
+
+  const messageLookup = useMemo(() => {
+    return new Map(visibleMessages.map(m => [m.id, m]));
+  }, [visibleMessages]);
 
   return (
     <SafeAreaView style={styles.container} edges={['bottom']}>

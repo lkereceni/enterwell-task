@@ -64,4 +64,22 @@ export const chatHistory: Message[] = [
     replyTo: null,
     reactions: { value: 1, count: 1 },
   },
+  {
+    id: 8,
+    type: 0,
+    from: 1,
+    text: 'Možeš li mi samo poslati link na te nove Figma screenove prije nego krenem?',
+    url: null,
+    replyTo: 6,
+    reactions: { value: 0, count: 0 },
+  },
+  {
+    id: 9,
+    type: 0,
+    from: 0,
+    text: 'Naravno, šaljem odmah!',
+    url: null,
+    replyTo: 8,
+    reactions: { value: 0, count: 0 },
+  },
 ];
