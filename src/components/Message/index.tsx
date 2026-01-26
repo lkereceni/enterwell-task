@@ -1,13 +1,15 @@
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Colors } from '../../constants/colors';
 import { Message as MessageType } from '../../types';
+import { memo } from 'react';
 
 interface MessageProps {
   message: MessageType;
   lookup?: Map<number, MessageType>;
+  onReplyPress?: (repliedId: number) => void;
 }
 
-export const Message = ({ message, lookup }: MessageProps) => {
+const MessageComponent = ({ message, lookup, onReplyPress }: MessageProps) => {
   const repliedMessage =
     message.replyTo && lookup ? lookup.get(message.replyTo) : null;
 
@@ -20,7 +22,10 @@ export const Message = ({ message, lookup }: MessageProps) => {
       }
     >
       {message.replyTo !== null ? (
-        <View style={styles.messageReplyContainer}>
+        <Pressable
+          style={styles.messageReplyContainer}
+          onPress={() => message.replyTo && onReplyPress?.(message.replyTo)}
+        >
           <Text
             style={styles.messageReplyText}
             numberOfLines={5}
@@ -28,7 +33,7 @@ export const Message = ({ message, lookup }: MessageProps) => {
           >
             {repliedMessage?.text}
           </Text>
-        </View>
+        </Pressable>
       ) : null}
       {message.type === 1 && message.url ? (
         <Image
@@ -45,6 +50,8 @@ export const Message = ({ message, lookup }: MessageProps) => {
     </View>
   );
 };
+
+export const Message = memo(MessageComponent);
 
 const styles = StyleSheet.create({
   leftMessageContainer: {
