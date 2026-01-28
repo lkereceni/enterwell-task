@@ -3,15 +3,16 @@ import { Colors } from '../constants/colors';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useCallback, useMemo, useRef } from 'react';
 import Ionicons from '@react-native-vector-icons/ionicons';
-import { chatHistory } from '../utils';
 import { Message } from '../components/Message';
 import { Message as MessageType } from '../types';
 import { TypingAnimation } from '../components/TypingAnimation';
 import { useVisibleMessages } from '../hooks/useVisibleMessages';
 
 export default function ChatScreen() {
+  const chat = require('../assets/chat.json');
+
   const { visibleMessages, isTyping, simulatedInput } = useVisibleMessages({
-    chatHistory,
+    chat,
   });
 
   const flatListRef = useRef<FlatList>(null);

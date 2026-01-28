@@ -2,12 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import { Message } from '../types';
 
 interface UseVisibleMessagesProps {
-  chatHistory: Message[];
+  chat: Message[];
   typingSpeed?: number;
 }
 
 export const useVisibleMessages = ({
-  chatHistory,
+  chat,
   typingSpeed = 50,
 }: UseVisibleMessagesProps) => {
   const [visibleMessages, setVisibleMessages] = useState<Message[]>([]);
@@ -23,7 +23,7 @@ export const useVisibleMessages = ({
     isMounted.current = true;
 
     const runSimulation = async () => {
-      for (const msg of chatHistory) {
+      for (const msg of chat) {
         if (!isMounted.current) break;
 
         if (msg.from === 1) {
@@ -59,7 +59,7 @@ export const useVisibleMessages = ({
     return () => {
       isMounted.current = false;
     };
-  }, [chatHistory, typingSpeed]);
+  }, [chat, typingSpeed]);
 
   return { visibleMessages, isTyping, simulatedInput };
 };
